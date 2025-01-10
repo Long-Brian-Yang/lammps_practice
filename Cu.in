@@ -1,0 +1,31 @@
+# LAMMPS input script for Cu melting simulation
+
+variable        t equal 1300
+
+log log1420.lammps
+
+units           metal
+boundary        p p p
+atom_style      atomic
+
+read_data       Cu.data
+replicate       1 1 1
+
+mass            1 63.546
+group           Cu  type 1
+
+pair_style      deepmd ./Cu_model.pb out_freq 100 out_file model_devi${t}.out
+pair_coeff      * *
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+velocity        all create ${t} 23456789
+
+fix             1 all npt temp ${t} ${t} 0.1 iso 0 0 0.5
+timestep        0.001  
+
+thermo_style    custom step temp pe ke etotal press density lx ly lz vol
+thermo          100
+
+run             5000
